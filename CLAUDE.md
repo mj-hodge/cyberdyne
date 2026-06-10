@@ -78,10 +78,25 @@ All agents use `claude-sonnet-4-6` by default. Per-phase overrides are configure
 
 ---
 
+## Environment Variables
+
+Credentials live in WSL environment variables, not in `config.yaml`:
+
+| Variable | Purpose |
+|----------|---------|
+| `SLACK_WEBHOOK_URL` | Slack incoming webhook URL |
+| `SLACK_CHANNEL` | (Optional) Channel override |
+| `ASANA_TOKEN` | Asana personal access token |
+| `ASANA_WORKSPACE_GID` | Asana workspace GID |
+
+Add these to `~/.bashrc` or `~/.zshrc` in WSL.
+
+---
+
 ## Slack Notifications
 
 After each phase completes (except the Phase 3 gate), the agent:
-1. POSTs a notification to the webhook in `config.yaml` → `slack.webhook_url`
+1. POSTs a notification to `$SLACK_WEBHOOK_URL`
 2. Waits `config.yaml` → `phases.pause_seconds` (default: 90)
 3. Continues to the next phase automatically
 

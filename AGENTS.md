@@ -57,9 +57,32 @@ The agent MUST NOT proceed until the user explicitly approves or redirects.
 
 ---
 
+## Environment Variables (REQUIRED)
+
+Credentials are stored in WSL environment variables, not in `config.yaml`. Agents MUST read these at startup:
+
+| Variable | Purpose |
+|----------|---------|
+| `SLACK_WEBHOOK_URL` | Slack incoming webhook URL |
+| `SLACK_CHANNEL` | (Optional) Override channel, e.g. `#dev-notifications` |
+| `ASANA_TOKEN` | Asana personal access token |
+| `ASANA_WORKSPACE_GID` | Asana workspace GID |
+
+If any required variable is unset, the agent MUST stop and notify the user before proceeding.
+
+**To set in WSL**, add to `~/.bashrc` or `~/.zshrc`:
+```bash
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/..."
+export SLACK_CHANNEL="#dev-notifications"   # optional
+export ASANA_TOKEN="your-token-here"
+export ASANA_WORKSPACE_GID="your-workspace-gid"
+```
+
+---
+
 ## Slack Notifications
 
-Send via `config.yaml` → `slack.webhook_url` using an HTTP POST.
+Send via the `SLACK_WEBHOOK_URL` environment variable using an HTTP POST.
 
 **Phase transition format:**
 ```
@@ -95,7 +118,7 @@ Asana: {project URL}
 
 ## Asana Integration
 
-**Session start:** The user provides an Asana project name or GID. The agent reads the Asana project description as its primary requirements input for Phase 1.
+**Session start:** The user provides an Asana project name or GID. The agent authenticates using `ASANA_TOKEN` and `ASANA_WORKSPACE_GID` from the environment, then reads the Asana project description as its primary requirements input for Phase 1.
 
 **Story creation (Phase 3 gate, on approval):**
 - Epics → Asana **sections** within the project
