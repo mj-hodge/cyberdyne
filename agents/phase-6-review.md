@@ -67,11 +67,26 @@ Two lenses — run both:
 ```
 1. Read all pre-work files
 2. Review with Architect lens — document findings
-3. Review with Skeptic lens — document findings
-4. Write review.md
-5. If Critical findings exist: STOP, surface to user, wait for fixes before marking done
+3. Adversarial pass — actively attempt to break the code against edge cases and acceptance criteria
+4. Write review.md with all findings
+5. If any findings cause test failures or broken behavior:
+   → Hand back to Phase 5 with: the finding, the failure, and the reproduction steps
+   → Phase 5 uses the debug-agent persona to diagnose and fix
+   → Phase 6 re-reviews after Phase 5 resolves
 6. If no Critical findings: update .project and backlog.md, send Slack, story is Done
 ```
+
+## Phase 5 Feedback Loop (CRITICAL)
+
+Phase 6 NEVER fixes code. When Phase 6 breaks something:
+
+1. Document the failure clearly in `review.md`:
+   - What was attempted
+   - What broke
+   - Reproduction steps
+2. Hand back to Phase 5 with that context
+3. Phase 5 picks up the debug-agent persona, diagnoses, and fixes
+4. Phase 6 re-runs its adversarial pass to confirm the fix holds
 
 ---
 
