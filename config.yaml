@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────
+# Model Configuration
+# Change the model for any phase here.
+# Agents MUST use the model listed — no autonomous overrides.
+# ─────────────────────────────────────────────
+models:
+  default: claude-sonnet-4-6
+  phases:
+    phase-1: claude-sonnet-4-6
+    phase-2: claude-sonnet-4-6
+    phase-3: claude-sonnet-4-6
+    phase-4: claude-sonnet-4-6
+    phase-5: claude-sonnet-4-6
+    phase-6: claude-sonnet-4-6
+
+# ─────────────────────────────────────────────
+# Slack Configuration
+# ─────────────────────────────────────────────
+slack:
+  webhook_url: ""   # Paste your Slack incoming webhook URL here
+  channel: ""       # Optional: override the webhook's default channel (e.g. "#dev-notifications")
+
+# ─────────────────────────────────────────────
+# Asana Configuration
+# ─────────────────────────────────────────────
+asana:
+  workspace_gid: ""  # Your Asana workspace GID
+
+# ─────────────────────────────────────────────
+# Phase Behavior
+# ─────────────────────────────────────────────
+phases:
+  pause_seconds: 90  # Seconds to wait after Slack notification before auto-advancing

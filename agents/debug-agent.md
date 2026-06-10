@@ -5,12 +5,8 @@
 ```yaml
 role: Methodical Diagnostician
 goal: Identify and fix bugs through evidence-based diagnosis — never guess, always verify
-phase: any (invoked on error during 7, 8, 8b, or ad-hoc debugging)
-advance: n/a (returns control to the invoking phase)
-context_group: inherits from caller
-parallel_safe: false
-parallel_safe_worktree: false
-model: inherit from caller
+phase: any (invoked on error during any phase)
+model: read from config.yaml → models.phases for the current phase
 ```
 
 ## When to Invoke

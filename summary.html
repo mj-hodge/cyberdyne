@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cyberdyne — SDLC Redesign Summary</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      line-height: 1.6;
+      padding: 2rem;
+    }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 2rem; font-weight: 700; color: #f7fafc; margin-bottom: 0.25rem; }
+    .subtitle { color: #718096; font-size: 0.95rem; margin-bottom: 2.5rem; }
+    h2 { font-size: 1.2rem; font-weight: 600; color: #90cdf4; margin: 2rem 0 1rem; border-bottom: 1px solid #2d3748; padding-bottom: 0.5rem; }
+    h3 { font-size: 1rem; font-weight: 600; color: #fbd38d; margin: 1.25rem 0 0.5rem; }
+    p { color: #cbd5e0; margin-bottom: 0.75rem; }
+    ul, ol { padding-left: 1.5rem; color: #cbd5e0; margin-bottom: 0.75rem; }
+    li { margin-bottom: 0.35rem; }
+    code {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 4px;
+      padding: 0.15rem 0.4rem;
+      font-family: "Fira Code", "Cascadia Code", monospace;
+      font-size: 0.85rem;
+      color: #68d391;
+    }
+    pre {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code { background: none; border: none; padding: 0; color: #68d391; font-size: 0.85rem; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1.25rem; font-size: 0.9rem; }
+    th { background: #1a202c; color: #90cdf4; text-align: left; padding: 0.6rem 0.9rem; border: 1px solid #2d3748; font-weight: 600; }
+    td { padding: 0.55rem 0.9rem; border: 1px solid #2d3748; color: #cbd5e0; vertical-align: top; }
+    tr:nth-child(even) td { background: #161b27; }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .badge-green  { background: #1c4532; color: #68d391; }
+    .badge-blue   { background: #1a365d; color: #90cdf4; }
+    .badge-yellow { background: #3d2e00; color: #fbd38d; }
+    .badge-red    { background: #4a1212; color: #fc8181; }
+    .badge-gray   { background: #2d3748; color: #a0aec0; }
+    .card {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .card-title { font-weight: 600; color: #f7fafc; margin-bottom: 0.4rem; }
+    .path {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin: 0.5rem 0;
+    }
+    .phase-bubble {
+      background: #2d3748;
+      border: 1px solid #4a5568;
+      border-radius: 6px;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #e2e8f0;
+    }
+    .phase-bubble.gate {
+      border-color: #f6ad55;
+      background: #3d2e00;
+      color: #fbd38d;
+    }
+    .arrow { color: #4a5568; font-size: 1rem; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+    .deleted { color: #fc8181; text-decoration: line-through; }
+    .added { color: #68d391; }
+    .stat { font-size: 2rem; font-weight: 700; color: #f7fafc; }
+    .stat-label { font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stats-row { display: flex; gap: 2rem; margin: 1rem 0 1.5rem; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Cyberdyne SDLC Redesign</h1>
+  <p class="subtitle">Branch: <code>dev</code> &nbsp;·&nbsp; June 2026 &nbsp;·&nbsp; Changes summarized below</p>
+
+  <div class="stats-row">
+    <div>
+      <div class="stat">6</div>
+      <div class="stat-label">New agent files</div>
+    </div>
+    <div>
+      <div class="stat">36</div>
+      <div class="stat-label">Old files removed</div>
+    </div>
+    <div>
+      <div class="stat">1</div>
+      <div class="stat-label">Gate (after Design)</div>
+    </div>
+    <div>
+      <div class="stat">90s</div>
+      <div class="stat-label">Phase pause window</div>
+    </div>
+  </div>
+
+  <!-- ─── Phase Structure ─────────────────────── -->
+  <h2>New Phase Structure</h2>
+
+  <table>
+    <thead>
+      <tr><th>Phase</th><th>Name</th><th>Scope</th><th>Transition</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>1</code></td>
+        <td>Seed</td>
+        <td>All</td>
+        <td><span class="badge badge-blue">Slack → 90s → auto</span></td>
+      </tr>
+      <tr>
+        <td><code>2</code></td>
+        <td>Discovery</td>
+        <td>Large only</td>
+        <td><span class="badge badge-blue">Slack → 90s → auto</span></td>
+      </tr>
+      <tr>
+        <td><code>3</code></td>
+        <td>Design</td>
+        <td>All</td>
+        <td><span class="badge badge-yellow">Hard gate — wait for approval</span></td>
+      </tr>
+      <tr>
+        <td><code>4</code></td>
+        <td>Test Design</td>
+        <td>All</td>
+        <td><span class="badge badge-blue">Slack → 90s → auto</span></td>
+      </tr>
+      <tr>
+        <td><code>5</code></td>
+        <td>Implementation</td>
+        <td>All</td>
+        <td><span class="badge badge-blue">Slack → 90s → auto</span></td>
+      </tr>
+      <tr>
+        <td><code>6</code></td>
+        <td>Review + Gate</td>
+        <td>Medium+</td>
+        <td><span class="badge badge-green">Done (blocked if Critical findings)</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Phase Paths</h3>
+  <div class="card">
+    <div class="card-title">Small</div>
+    <div class="path">
+      <span class="phase-bubble">1 Seed</span><span class="arrow">→</span>
+      <span class="phase-bubble">3 Design</span><span class="arrow">→</span>
+      <span class="phase-bubble gate">⏸ Gate</span><span class="arrow">→</span>
+      <span class="phase-bubble">4 Test</span><span class="arrow">→</span>
+      <span class="phase-bubble">5 Implement</span><span class="arrow">→</span>
+      <span class="phase-bubble">Done</span>
+    </div>
+    <p style="font-size:0.8rem;color:#718096;margin-top:0.5rem;">Phase 2 skipped. Phase 6 skipped.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Medium</div>
+    <div class="path">
+      <span class="phase-bubble">1 Seed</span><span class="arrow">→</span>
+      <span class="phase-bubble">3 Design</span><span class="arrow">→</span>
+      <span class="phase-bubble gate">⏸ Gate</span><span class="arrow">→</span>
+      <span class="phase-bubble">4 Test</span><span class="arrow">→</span>
+      <span class="phase-bubble">5 Implement</span><span class="arrow">→</span>
+      <span class="phase-bubble">6 Review</span><span class="arrow">→</span>
+      <span class="phase-bubble">Done</span>
+    </div>
+    <p style="font-size:0.8rem;color:#718096;margin-top:0.5rem;">Phase 2 skipped.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Large</div>
+    <div class="path">
+      <span class="phase-bubble">1 Seed</span><span class="arrow">→</span>
+      <span class="phase-bubble">2 Discovery</span><span class="arrow">→</span>
+      <span class="phase-bubble">3 Design</span><span class="arrow">→</span>
+      <span class="phase-bubble gate">⏸ Gate</span><span class="arrow">→</span>
+      <span class="phase-bubble">4 Test</span><span class="arrow">→</span>
+      <span class="phase-bubble">5 Implement</span><span class="arrow">→</span>
+      <span class="phase-bubble">6 Review</span><span class="arrow">→</span>
+      <span class="phase-bubble">Done</span>
+    </div>
+  </div>
+
+  <!-- ─── Gate Behavior ────────────────────────── -->
+  <h2>Gate Behavior (Phase 3)</h2>
+  <p>The single hard gate fires after Design. The agent stops and presents:</p>
+  <ul>
+    <li><strong>Requirements summary</strong> — distilled from Seed and Discovery</li>
+    <li><strong>Design plan</strong> — architecture, components, key decisions</li>
+    <li><strong>Epics and stories</strong> — full list with acceptance criteria</li>
+  </ul>
+  <p style="margin-top:0.75rem;">On approval, the agent creates the Asana structure and sends a Slack notification before continuing to Phase 4.</p>
+
+  <!-- ─── Slack Notifications ──────────────────── -->
+  <h2>Slack Notifications</h2>
+  <p>After each non-gate phase transition, the agent sends a Slack notification to the webhook configured in <code>config.yaml</code>, waits 90 seconds, then continues automatically.</p>
+  <pre><code>*Phase {N} Complete: {Phase Name}*
+Project: {project name}
+Produced: {one-line summary}
+Next: Phase {N+1} ({name}) starting in 90s
+Asana: {project URL}</code></pre>
+
+  <!-- ─── Model Policy ──────────────────────────── -->
+  <h2>Model Policy</h2>
+  <p>All phases default to <code>claude-sonnet-4-6</code>. To change the model for any phase, edit <code>config.yaml</code>:</p>
+  <pre><code>models:
+  default: claude-sonnet-4-6
+  phases:
+    phase-1: claude-sonnet-4-6   # change this line to override
+    phase-3: claude-opus-4-8     # e.g. use Opus for Design only</code></pre>
+  <p>Agents MUST read this config at startup. No autonomous model selection is permitted.</p>
+
+  <!-- ─── Asana Integration ────────────────────── -->
+  <h2>Asana Integration</h2>
+  <ul>
+    <li><strong>You create the project</strong> in Asana and write requirements in the project description.</li>
+    <li><strong>Phase 1</strong> reads the project description as its requirements input.</li>
+    <li><strong>After Phase 3 gate approval</strong>, the agent creates:
+      <ul>
+        <li>Epics → Asana <em>sections</em> within the project</li>
+        <li>Stories → Asana <em>tasks</em> grouped under each section, with acceptance criteria</li>
+      </ul>
+    </li>
+  </ul>
+
+  <!-- ─── Files Changed ───────────────────────── -->
+  <h2>Files Changed</h2>
+
+  <h3>Rewritten</h3>
+  <table>
+    <thead><tr><th>File</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td><code>AGENTS.md</code></td><td>Full rewrite — new phase structure, gate behavior, Slack protocol, model policy, Asana integration</td></tr>
+      <tr><td><code>CLAUDE.md</code></td><td>Full rewrite — aligned to new 6-phase structure, removed old phase references</td></tr>
+      <tr><td><code>agents/debug-agent.md</code></td><td>Updated model gate to read from <code>config.yaml</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Created</h3>
+  <table>
+    <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>config.yaml</code></td><td>Single entry point for model overrides, Slack webhook, Asana workspace GID, pause duration</td></tr>
+      <tr><td><code>agents/phase-1-seed.md</code></td><td>Phase 1 persona — Business Analyst</td></tr>
+      <tr><td><code>agents/phase-2-discovery.md</code></td><td>Phase 2 persona — Discovery Researcher (Large scope only)</td></tr>
+      <tr><td><code>agents/phase-3-design.md</code></td><td>Phase 3 persona — Systems Architect (owns the hard gate)</td></tr>
+      <tr><td><code>agents/phase-4-test.md</code></td><td>Phase 4 persona — Test Designer (TDD, RED state)</td></tr>
+      <tr><td><code>agents/phase-5-implementation.md</code></td><td>Phase 5 persona — Software Engineer (makes tests GREEN)</td></tr>
+      <tr><td><code>agents/phase-6-review.md</code></td><td>Phase 6 persona — Code Reviewer (Architect + Skeptic lenses)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Deleted (36 files)</h3>
+  <p>All old phase agent files were removed. The full list:</p>
+  <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.5rem;">
+    <code class="deleted">phase-1-seed.md (old)</code>
+    <code class="deleted">phase-2-research.md</code>
+    <code class="deleted">phase-2-market-scout.md</code>
+    <code class="deleted">phase-2-library-miner.md</code>
+    <code class="deleted">phase-2-field-reporter.md</code>
+    <code class="deleted">phase-3-expansion.md</code>
+    <code class="deleted">phase-3-pragmatist.md</code>
+    <code class="deleted">phase-3-futurist.md</code>
+    <code class="deleted">phase-3-optimizer.md</code>
+    <code class="deleted">phase-4-analysis.md</code>
+    <code class="deleted">phase-4-technical.md</code>
+    <code class="deleted">phase-4-business.md</code>
+    <code class="deleted">phase-4-risk.md</code>
+    <code class="deleted">phase-5-selection.md</code>
+    <code class="deleted">phase-6-design.md (old)</code>
+    <code class="deleted">phase-6b-security.md</code>
+    <code class="deleted">phase-6c-ux-review.md</code>
+    <code class="deleted">phase-6d-ops-review.md</code>
+    <code class="deleted">phase-7-test-design.md</code>
+    <code class="deleted">phase-7-frontend-testing.md</code>
+    <code class="deleted">phase-8-implementation.md</code>
+    <code class="deleted">phase-8b-code-review.md</code>
+    <code class="deleted">phase-8b-architect.md</code>
+    <code class="deleted">phase-8b-skeptic.md</code>
+    <code class="deleted">phase-8b-simplifier.md</code>
+    <code class="deleted">phase-8b-rules.md</code>
+    <code class="deleted">phase-8b-qa.md</code>
+    <code class="deleted">phase-8b-browser-tester.md</code>
+    <code class="deleted">phase-9-refinement.md</code>
+    <code class="deleted">phase-10-operations.md</code>
+    <code class="deleted">phase-11-predeploy-gate.md</code>
+    <code class="deleted">phase-11-predeploy.md</code>
+    <code class="deleted">pm-product-manager.md</code>
+    <code class="deleted">retro-process-engineer.md</code>
+    <code class="deleted">sync-source-story-spawner.md</code>
+    <code class="deleted">sync-source-validator.md</code>
+  </div>
+
+  <!-- ─── Next Steps ───────────────────────────── -->
+  <h2>Next Steps</h2>
+  <ol>
+    <li>Fill in <code>config.yaml</code> — add your Slack webhook URL, Asana workspace GID</li>
+    <li>Review and merge the <code>dev</code> branch to <code>main</code> when ready</li>
+    <li>Create your first Asana project with requirements in the description</li>
+    <li>Kick off with <code>spec &lt;project name or description&gt;</code></li>
+  </ol>
+
+  <p style="margin-top:2.5rem;color:#4a5568;font-size:0.8rem;">Generated on the <code>dev</code> branch · cyberdyne · June 2026</p>
+
+</div>
+</body>
+</html>
