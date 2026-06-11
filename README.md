@@ -1,2 +1,0 @@
-# cyberdyne
-AI Agent Framework
